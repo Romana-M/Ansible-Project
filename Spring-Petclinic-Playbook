@@ -1,0 +1,30 @@
+- hosts: all
+  user: ubuntu
+  become_user: root
+  become_method: sudo
+  become: yes
+
+  vars:
+    package_name_Ubuntu: openjdk-8-jdk
+    package_name_RedHat: java-1.8.0-openjdk-devel
+
+  tasks:
+    - name: Copy the Spring Petclinic Artifact from Ansible Server to Remote Server
+      copy:
+        src: /etc/ansible/spring-petclinic/target/spring-petclinic-2.7.0-SNAPSHOT.jar
+        dest: /tmp/spring-petclinic-2.7.0-SNAPSHOT.jar
+
+    - name: Install Java on Debian server
+      apt:
+        name: "{{package_name_Ubuntu}}"
+        state: present
+      when: ansible_distribution=="Ubuntu"
+
+    - name: Install Java on RedHat server
+      yum:
+        name: "{{package_name_RedHat}}"
+        state: present
+      when: ansible_distribution=="RedHat"
+
+    - name: Run Spring Petclinic on Remote Server
+      shell: nohup java -jar /tmp/spring-petclinic-2.7.0-SNAPSHOT.jar & exit
